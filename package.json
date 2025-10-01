@@ -20,16 +20,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@inquirer/prompts": "^7.8.6",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^24.6.1",
     "chalk": "^4.1.2",
     "commander": "^14.0.1",
+    "diff": "^8.0.2",
     "fs-extra": "^11.3.2",
     "inquirer": "^12.9.6",
+    "keypress": "^0.2.1",
     "openai": "^6.0.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/diff": "^8.0.0",
     "@types/fs-extra": "^11.0.4"
   }
 }

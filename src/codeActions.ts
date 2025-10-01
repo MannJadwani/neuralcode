@@ -2,6 +2,8 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { executeFileOperation } from './files';
 import { executeCommand } from './commands';
+import * as diff from 'diff';
+import chalk from 'chalk';
 
 export interface CodeAction {
   type: 'create_file' | 'edit_file' | 'run_command' | 'read_file';
@@ -87,6 +89,8 @@ export async function executeCodeActions(actions: CodeAction[]): Promise<string[
             content: action.content
           });
           results.push(`✅ ${result}`);
+          // Show diff for new file
+          results.push(`📄 New file content:\n${action.content}`);
           break;
 
         case 'edit_file':
@@ -94,6 +98,19 @@ export async function executeCodeActions(actions: CodeAction[]): Promise<string[
             results.push('ERROR: Missing parameters for edit_file');
             continue;
           }
+          // Read original content for diff
+          let originalContent = '';
+          try {
+            const readResult = await executeFileOperation({
+              type: 'read',
+              filePath: action.filePath
+            });
+            originalContent = readResult as string;
+          } catch (error) {
+            // File might not exist, use empty string
+            originalContent = '';
+          }
+
           const editResult = await executeFileOperation({
             type: 'edit',
             filePath: action.filePath,
@@ -101,6 +118,11 @@ export async function executeCodeActions(actions: CodeAction[]): Promise<string[
             newString: action.newString
           });
           results.push(`✅ ${editResult}`);
+
+          // Show diff
+          const newContent = originalContent.replace(action.oldString, action.newString);
+          const patches = diff.createPatch(action.filePath, originalContent, newContent, 'original', 'modified');
+          results.push(`🔍 Changes made:\n${formatDiff(patches)}`);
           break;
 
         case 'run_command':
@@ -135,4 +157,25 @@ export async function executeCodeActions(actions: CodeAction[]): Promise<string[
   }
 
   return results;
+}
+
+function formatDiff(patch: string): string {
+  const lines = patch.split('\n');
+  let result = '';
+
+  for (const line of lines) {
+    if (line.startsWith('@@')) {
+      // Skip diff headers for cleaner output
+      continue;
+    } else if (line.startsWith('+')) {
+      result += chalk.green(line) + '\n';
+    } else if (line.startsWith('-')) {
+      result += chalk.red(line) + '\n';
+    } else if (line.startsWith(' ')) {
+      // Context lines - show in gray
+      result += chalk.gray(line) + '\n';
+    }
+  }
+
+  return result.trim();
 }
