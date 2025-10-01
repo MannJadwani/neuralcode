@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAIResponse = getAIResponse;
-const openai_1 = require("openai");
+const openai_1 = __importDefault(require("openai"));
 const context_1 = require("./context");
 let openai = null;
 function getOpenAIClient(apiKey) {

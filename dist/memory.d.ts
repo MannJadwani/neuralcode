@@ -2,6 +2,7 @@ export interface UserPreferences {
     preferredLanguage?: string;
     codingStyle?: string;
     apiKey?: string;
+    model?: string;
     [key: string]: any;
 }
 export declare function loadPreferences(): Promise<UserPreferences>;
